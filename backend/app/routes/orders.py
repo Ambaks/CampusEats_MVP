@@ -1,1 +1,3 @@
-# orders.py - This file is part of the backend/app/routes directory.
+from fastapi import APIRouter
+
+router = APIRouter()
