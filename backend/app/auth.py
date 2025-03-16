@@ -15,3 +15,4 @@ def verify_token(token: HTTPAuthorizationCredentials = Depends(security)):
         return decoded_token
     except Exception as e:
         raise HTTPException(status_code=401, detail="Invalid or expired token")
+    

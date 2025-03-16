@@ -1,1 +1,6 @@
-# schemas.py - This file is part of the backend/app directory.
+from pydantic import BaseModel, EmailStr
+
+class UserCreate(BaseModel):
+    email: EmailStr
+    password: str
+    username: str = None
