@@ -22,7 +22,7 @@ async def create_user(user: UserCreate, db: Session = Depends(get_db)):
         new_user = auth.create_user(email=user.email, password=user.password, display_name=user.username)
 
         # Store user in PostgreSQL
-        db_user = User(uid=new_user.uid, email=user.email, username=user.username)
+        db_user = User(uid=new_user.uid, email=user.email, username=user.username, role="buyer")
         db.add(db_user)
         db.commit()
 
