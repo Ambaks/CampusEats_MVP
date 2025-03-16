@@ -16,6 +16,7 @@ venv/
 # next.js
 /.next/
 /out/
+backend/*.json
 
 # production
 /build
