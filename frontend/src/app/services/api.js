@@ -1,4 +1,4 @@
-const API_BASE_URL = "https://localhost:8000"; // Replace with actual backend URL
+const API_BASE_URL = "http://localhost:8000"; // Replace with actual backend URL
 
 export const fetchMeals = async (userLat, userLon) => {
     const response = await fetch(`${API_BASE_URL}/meals/?user_lat=${userLat}&user_lon=${userLon}`);

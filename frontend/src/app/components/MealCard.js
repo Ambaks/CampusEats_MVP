@@ -7,7 +7,6 @@ import {
     Button,
   } from "@mui/material";
   import Image from "next/image";
-  import RoomIcon from "@mui/icons-material/Room"; // Location pin icon
   
   export function MealCard({ meal, isFlipped, onFlip }) {
     // Convert distance: Show in meters if below 1000, otherwise convert to km

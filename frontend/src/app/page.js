@@ -11,11 +11,7 @@ import "@fontsource/poppins";
 import SearchBar from "./components/SearchBar";
 import theme from "./theme";
 import { promoCards, categories } from "./data/data";
-import { meals } from "./data/meals";
-import { MealCard } from "./components/MealCard";
-import AddressSelector from "./components/AddressSelector";
 import NotificationCart from "./components/NotificationCart";
-import AddressDrawer from "./components/AddressDrawer";
 import MealList from "./components/MealList";
 
 export default function HomePage() {
@@ -61,10 +57,10 @@ export default function HomePage() {
       {/* Entire page scrolls naturally */}
       <Box sx={{ backgroundColor: "background.default" }}>
         {/* TOP BAR */}
-        <Box className="p-1 border border-[rgba(0,0,0,0.1)] shadow-md" sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", background: "white" }}>
-        <AddressSelector address="290 W Sycamore St" onOpenDrawer={handleOpenDrawer} />
+        <Box className="p-1 shadow-md" sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", background: "#FF7F51" }}>
+        <img src="/homekooks.png" alt="Logo" style={{ height: 40 }} />
         <NotificationCart />
-        <AddressDrawer open={openDrawer} onClose={handleCloseDrawer} currentAddress="290 W Sycamore St" />
+       
         </Box>
 
         <SearchBar/>
@@ -106,6 +102,7 @@ export default function HomePage() {
             height: 120,
             overflow: "hidden",
             mb: 2,
+
           }}
         >
           {promoCards.map((promo, idx) => (
@@ -113,17 +110,17 @@ export default function HomePage() {
               key={promo.id}
               sx={{
                 position: "absolute",
-                top: 0,
-                left: idx === promoIndex ? 0 : "100%",
-                width: "100%",
-                height: "100%",
+                left: idx === promoIndex ? 4 : "100%",
+                width: "98%",
+                height: "96%",
+                top: 3,
                 transition: "left 0.5s ease-in-out",
                 display: "flex",
                 alignItems: "center",
                 backgroundColor: "#fff",
                 boxShadow: 1,
-                borderRadius: 2,
-                overflow: "hidden",
+                borderRadius: 4,
+                overflow: "auto",
                 p: 1,
               }}
             >
