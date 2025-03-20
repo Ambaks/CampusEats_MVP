@@ -7,6 +7,7 @@ import {
     Button,
   } from "@mui/material";
   import Image from "next/image";
+import ActionButtons from "./ActionButtons";
   
   export function MealCard({ meal, isFlipped, onFlip }) {
     // Convert distance: Show in meters if below 1000, otherwise convert to km
@@ -119,25 +120,9 @@ import {
               </Typography>
             </Box>
             <Box className="flex justify-between mt-4">
-              <Button
-                variant="outlined"
-                size="small"
-                sx={{
-                  borderRadius: "20px",
-                  borderColor: "primary.main",
-                  color: "primary.main",
-                }}
-              >
-                More Info
-              </Button>
-              <Button
-                variant="contained"
-                color="secondary"
-                size="small"
-                sx={{ borderRadius: "20px" }}
-              >
-                Order Now
-              </Button>
+              
+              <ActionButtons/>
+
             </Box>
           </Card>
         </Box>
