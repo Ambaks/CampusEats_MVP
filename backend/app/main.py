@@ -1,7 +1,8 @@
 from fastapi import FastAPI, Request
 from database import engine, Base
-from routes import users, meals, orders
+import endpoints
 from starlette.middleware.base import BaseHTTPMiddleware
+from fastapi.middleware.cors import CORSMiddleware
 import logging
 import time
 
@@ -12,6 +13,14 @@ app = FastAPI()
 
 # Set up logging
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Allow frontend origin
+    allow_credentials=True,
+    allow_methods=["*"],  # Allow all HTTP methods (GET, POST, PUT, DELETE)
+    allow_headers=["*"],  # Allow all headers, including Authorization
+)
 
 # Middleware to log requests & responses
 class LoggingMiddleware(BaseHTTPMiddleware):
@@ -26,9 +35,8 @@ class LoggingMiddleware(BaseHTTPMiddleware):
 app.add_middleware(LoggingMiddleware)
 
 # Include API routes
-app.include_router(users.router)
-app.include_router(meals.router)
-app.include_router(orders.router)
+app.include_router(endpoints.router)
+
 
 @app.get("/")
 def read_root():

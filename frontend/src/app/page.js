@@ -1,127 +1,157 @@
 "use client";
-import { useState } from "react";
-import { TextField, Button, Card, CardContent, Typography, CircularProgress } from "@mui/material";
-import { loginUser, registerUser } from "../../utils/auth";
+import React, { useState, useCallback, useEffect } from "react";
+import {
+  Typography,
+  Box,
+} from "@mui/material";
 
-export default function Auth() {
-    const [email, setEmail] = useState("");
-    const [password, setPassword] = useState("");
-    const [confirmPassword, setConfirmPassword] = useState("");
-    const [username, setUsername] = useState("");
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState("");
-    const [isRegister, setIsRegister] = useState(false); // Toggle between login/register
+import { ThemeProvider } from "@mui/material/styles";
+import "@fontsource/poppins"; 
 
-    const handleLogin = async (e) => {
-        e.preventDefault();
-        setLoading(true);
-        setError("");
+import SearchBar from "./components/SearchBar";
+import theme from "./theme";
+import { promoCards, categories } from "./data/data";
+import { meals } from "./data/meals";
+import { MealCard } from "./components/MealCard";
+import AddressSelector from "./components/AddressSelector";
+import NotificationCart from "./components/NotificationCart";
+import AddressDrawer from "./components/AddressDrawer";
+import MealList from "./components/MealList";
 
-        try {
-            await loginUser(email, password);
-        } catch (err) {
-            setError("Invalid email or password");
-        }
+export default function HomePage() {
+  const [selectedTab, setSelectedTab] = useState(0);
+  const [flippedCards, setFlippedCards] = useState({});
+  const [openDrawer, setOpenDrawer] = useState(false);
+  const [promoIndex, setPromoIndex] = useState(0);
+  const [location, setLocation] = useState({ lat: null, lon: null });
+  
 
-        setLoading(false);
-    };
+  // Flip card handler
+  const handleFlip = useCallback((id) => {
+    setFlippedCards((prev) => ({ ...prev, [id]: !prev[id] }));
+  }, []);
 
-    const handleRegister = async (e) => {
-        e.preventDefault();
-        setLoading(true);
-        setError("");
+  // Open/Close drawer handlers
+  const handleOpenDrawer = () => setOpenDrawer(true);
+  const handleCloseDrawer = () => setOpenDrawer(false);
 
-        if (password !== confirmPassword) {
-            setError("Passwords do not match");
-            setLoading(false);
-            return;
-        }
+  // Automatically rotate the promo cards every 3 seconds
+  useEffect(() => {
 
-        try {
-            await registerUser(email, password, username);
-        } catch (err) {
-            setError("Registration failed. Please try again.");
-        }
+    if ("geolocation" in navigator) {
+        navigator.geolocation.getCurrentPosition(
+            (position) => {
+                setLocation({
+                    lat: position.coords.latitude,
+                    lon: position.coords.longitude,
+                });
+            },
+            (error) => console.error("Geolocation error:", error)
+        );
+    }
 
-        setLoading(false);
-    };
+    const interval = setInterval(() => {
+      setPromoIndex((prev) => (prev + 1) % promoCards.length);
+    }, 3000);
+    return () => clearInterval(interval);
+  }, []);
 
-    return (
-        <div className="flex min-h-screen items-center justify-center bg-gray-100">
-            <Card className="w-full max-w-sm shadow-lg rounded-2xl">
-                <CardContent>
-                    <Typography variant="h5" align="center" gutterBottom>
-                        {isRegister ? "Register for CampusEats" : "Login to CampusEats"}
-                    </Typography>
+  return (
+    <ThemeProvider theme={theme}>
+      {/* Entire page scrolls naturally */}
+      <Box sx={{ backgroundColor: "background.default" }}>
+        {/* TOP BAR */}
+        <Box className="p-1 border border-[rgba(0,0,0,0.1)] shadow-md" sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", background: "white" }}>
+        <AddressSelector address="290 W Sycamore St" onOpenDrawer={handleOpenDrawer} />
+        <NotificationCart />
+        <AddressDrawer open={openDrawer} onClose={handleCloseDrawer} currentAddress="290 W Sycamore St" />
+        </Box>
 
-                    <form onSubmit={isRegister ? handleRegister : handleLogin} className="space-y-4">
-                        {isRegister && (
-                            <TextField
-                                label="Username"
-                                type="text"
-                                variant="outlined"
-                                fullWidth
-                                value={username}
-                                onChange={(e) => setUsername(e.target.value)}
-                                required
-                            />
-                        )}
-                        <TextField
-                            label="Email"
-                            type="email"
-                            variant="outlined"
-                            fullWidth
-                            value={email}
-                            onChange={(e) => setEmail(e.target.value)}
-                            required
-                        />
-                        <TextField
-                            label="Password"
-                            type="password"
-                            variant="outlined"
-                            fullWidth
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                            required
-                        />
-                        {isRegister && (
-                            <TextField
-                                label="Confirm Password"
-                                type="password"
-                                variant="outlined"
-                                fullWidth
-                                value={confirmPassword}
-                                onChange={(e) => setConfirmPassword(e.target.value)}
-                                required
-                            />
-                        )}
+        <SearchBar/>
 
-                        {error && (
-                            <Typography color="error" className="text-sm text-red-500">
-                                {error}
-                            </Typography>
-                        )}
+        {/* HORIZONTAL ICON CAROUSEL (categories) */}
+        <Box
+          sx={{
+            display: "flex",
+            gap: 2,
+            overflowX: "auto",
+            px: 2,
+            pb: 2,
+            "&::-webkit-scrollbar": { display: "none" },
+          }}
+        >
+          {categories.map((cat) => (
+            <Box
+              key={cat.label}
+              sx={{
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                minWidth: 60,
+              }}
+            >
+              {cat.icon}
+              <Typography variant="caption" color="black" sx={{ mt: 0.5 }}>
+                {cat.label}
+              </Typography>
+            </Box>
+          ))}
+        </Box>
 
-                        <Button
-                            type="submit"
-                            variant="contained"
-                            fullWidth
-                            color="primary"
-                            disabled={loading}
-                            className="rounded-xl text-lg"
-                        >
-                            {loading ? <CircularProgress size={24} color="inherit" /> : isRegister ? "Register" : "Login"}
-                        </Button>
-                    </form>
+        {/* PROMO CAROUSEL (3 cards, auto-rotate) */}
+        <Box
+          sx={{
+            position: "relative",
+            width: "100%",
+            height: 120,
+            overflow: "hidden",
+            mb: 2,
+          }}
+        >
+          {promoCards.map((promo, idx) => (
+            <Box
+              key={promo.id}
+              sx={{
+                position: "absolute",
+                top: 0,
+                left: idx === promoIndex ? 0 : "100%",
+                width: "100%",
+                height: "100%",
+                transition: "left 0.5s ease-in-out",
+                display: "flex",
+                alignItems: "center",
+                backgroundColor: "#fff",
+                boxShadow: 1,
+                borderRadius: 2,
+                overflow: "hidden",
+                p: 1,
+              }}
+            >
+              <Box sx={{ mr: 2 }}>{promo.icon}</Box>
+              <Box>
+                <Typography variant="body2" color="black" sx={{ fontWeight: "bold" }}>
+                  {promo.title}
+                </Typography>
+              </Box>
+            </Box>
+          ))}
+        </Box>
 
-                    <Typography align="center" variant="body2" className="mt-4">
-                        {isRegister ? "Already have an account?" : "Don't have an account?"}
-                        <Button color="secondary" onClick={() => setIsRegister(!isRegister)}>
-                            {isRegister ? "Login" : "Register"}
-                        </Button>
-                    </Typography>
-                </CardContent>
-            </Card>
-        </div>
-    );
+        {/* FLIPPING MEAL CARDS */}
+        <Box
+        className="mb-14"
+          sx={{
+            p: 1,
+            
+          }}
+        >
+          {location.lat && location.lon ? (
+                <MealList userLat={location.lat} userLon={location.lon} />
+            ) : (
+                <p>Fetching location...</p>
+            )}
+        </Box>
+      </Box>
+    </ThemeProvider>
+  );
 }
