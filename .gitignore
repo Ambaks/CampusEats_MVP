@@ -44,7 +44,7 @@ node_modules/
 # Ignore Virtual Environment
 .env
 .env.local
-
+backend/.env
 # env files (can opt-in for committing if needed)
 .env*
 
@@ -54,3 +54,4 @@ node_modules/
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+backend/.env
