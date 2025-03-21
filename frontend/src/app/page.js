@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useCallback, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Typography,
   Box,
@@ -15,21 +15,9 @@ import NotificationCart from "./components/NotificationCart";
 import MealList from "./components/MealList";
 
 export default function HomePage() {
-  const [selectedTab, setSelectedTab] = useState(0);
-  const [flippedCards, setFlippedCards] = useState({});
-  const [openDrawer, setOpenDrawer] = useState(false);
   const [promoIndex, setPromoIndex] = useState(0);
   const [location, setLocation] = useState({ lat: null, lon: null });
-  
 
-  // Flip card handler
-  const handleFlip = useCallback((id) => {
-    setFlippedCards((prev) => ({ ...prev, [id]: !prev[id] }));
-  }, []);
-
-  // Open/Close drawer handlers
-  const handleOpenDrawer = () => setOpenDrawer(true);
-  const handleCloseDrawer = () => setOpenDrawer(false);
 
   // Automatically rotate the promo cards every 3 seconds
   useEffect(() => {

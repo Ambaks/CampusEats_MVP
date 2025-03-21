@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from database import get_db
 from models import Meal, User
 from schemas import MealCreate, MealUpdate, UserCreate, UserResponse, MealResponse
-from crud import create_meal, get_meal, get_meals, update_meal, delete_meal
+from crud import create_meal, get_meal, get_meals, update_meal, delete_meal, get_cart, create_or_update_cart
 from typing import List
 from auth import get_current_user  # Import authentication dependency
 
@@ -58,3 +58,24 @@ def delete_meal_route(meal_id: int, db: Session = Depends(get_db), current_user:
     if not deleted_meal:
         raise HTTPException(status_code=404, detail="Meal not found or unauthorized")
     return deleted_meal
+
+
+@router.get("api/cart/{user_id}")
+def read_cart(user_id: str, db: Session = Depends(get_db)):
+    return get_cart(db, user_id) or {"user_id": user_id, "items": []}
+
+@router.post("api/cart/{user_id}")
+def update_cart(user_id: str, items: list, db: Session = Depends(get_db)):
+    return create_or_update_cart(db, user_id, items)
+
+@router.delete("/api/cart/{user_id}/{meal_id}")
+def remove_cart_item(user_id: str, meal_id: int, db: Session = Depends(get_db)):
+    cart = get_cart(db, user_id)
+    if not cart:
+        raise HTTPException(status_code=404, detail="Cart not found")
+
+    cart.items = [item for item in cart.items if item["mealId"] != meal_id]
+
+    db.commit()
+    db.refresh(cart)
+    return cart

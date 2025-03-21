@@ -1,6 +1,7 @@
 from fastapi import FastAPI, Request
 from database import engine, Base
 import endpoints
+from routes import payments
 from starlette.middleware.base import BaseHTTPMiddleware
 from fastapi.middleware.cors import CORSMiddleware
 import logging
@@ -36,6 +37,7 @@ app.add_middleware(LoggingMiddleware)
 
 # Include API routes
 app.include_router(endpoints.router)
+app.include_router(payments.router)
 
 
 @app.get("/")

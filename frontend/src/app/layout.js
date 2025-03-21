@@ -1,6 +1,9 @@
+// app/layout.js
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Navbar from "./components/Navbar";
+import { AuthProvider } from "./context/AuthContext"; // adjust the path if needed
+import { CartProvider } from "./context/CartContext"; // adjust the path if needed
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -21,8 +24,12 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <body className="antialiased">
-        <main>{children}</main> {/* This is where page content loads */}
-        <Navbar /> {/* Fixed bottom navbar */}
+        <AuthProvider>
+          <CartProvider>
+            <main>{children}</main> {/* Page content goes here */}
+            <Navbar /> {/* Fixed bottom navbar */}
+          </CartProvider>
+        </AuthProvider>
       </body>
     </html>
   );

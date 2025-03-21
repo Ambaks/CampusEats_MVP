@@ -1,17 +1,15 @@
-import { Box, IconButton } from "@mui/material";
-import NotificationsIcon from "@mui/icons-material/Notifications";
+import { Box } from "@mui/material";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
+import CartIcon from "./CartIcon";
 
 export default function NotificationCart() {
   return (
-    <Box>
-      <IconButton size="small" sx={{ color: "black" }}>
-        <NotificationsIcon />
-      </IconButton>
-      <IconButton size="small" sx={{ color: "black" }}>
-        <ShoppingCartIcon />
-      </IconButton>
-    </Box>
-
+    <div className="mr-3 mt-2">
+      <Box>
+        <CartIcon size="small" sx={{ color: "black" }}>
+          <ShoppingCartIcon />
+        </CartIcon>
+      </Box>
+    </div>
   );
 }

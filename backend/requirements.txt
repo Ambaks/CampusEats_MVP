@@ -7,3 +7,5 @@ alembic
 psycopg2
 firebase-admin
 fastapi-users
+dotenv
+stripe

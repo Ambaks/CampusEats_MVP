@@ -121,7 +121,7 @@ import ActionButtons from "./ActionButtons";
             </Box>
             <Box className="flex justify-between mt-4">
               
-              <ActionButtons/>
+              <ActionButtons meal={meal}/>
 
             </Box>
           </Card>

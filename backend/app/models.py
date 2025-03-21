@@ -1,5 +1,6 @@
 from sqlalchemy.orm import declarative_base, relationship
 from sqlalchemy import Column, Integer, String, Float, ForeignKey, Text, DateTime, Boolean, func, Index
+from sqlalchemy.dialects.postgresql import ARRAY, JSON
 from datetime import datetime
 from database import Base
 
@@ -59,3 +60,12 @@ class Order(Base):
     
     buyer = relationship("User", back_populates="orders")
     meal = relationship("Meal", back_populates="orders")
+
+
+class Cart(Base):
+    __tablename__ = "carts"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(String, index=True, nullable=False)
+    items = Column(JSON, nullable=False, default=[])  # JSON column to store cart items
+    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())

@@ -13,6 +13,13 @@ export default function Navbar() {
   const router = useRouter();
   const [selectedTab, setSelectedTab] = useState(0);
 
+  const actionSx = {
+    color: "black",
+    "&.Mui-selected": {
+      color: "white", // teal blue color when selected
+    },
+  };
+
   return (
     <BottomNavigation
     className="z-999"
@@ -41,14 +48,14 @@ export default function Navbar() {
         bottom: 0,
         left: 0,
         right: 0,
-        backgroundColor: "#fff",
+        backgroundColor: "#FF7F51",
         boxShadow: 4,
       }}
     >
-      <BottomNavigationAction label="Home" icon={<HomeIcon />} />
-      <BottomNavigationAction label="Map" icon={<MapIcon />} />
-      <BottomNavigationAction label="Profile" icon={<AccountCircleIcon />} />
-      <BottomNavigationAction label="Earn" icon={<AttachMoneyIcon />} />
+      <BottomNavigationAction label="Home" icon={<HomeIcon />} sx={actionSx} />
+      <BottomNavigationAction label="Map" icon={<MapIcon />} sx={actionSx}/>
+      <BottomNavigationAction label="Profile" icon={<AccountCircleIcon />} sx={actionSx}/>
+      <BottomNavigationAction label="Earn" icon={<AttachMoneyIcon />} sx={actionSx}/>
     </BottomNavigation>
   );
 }

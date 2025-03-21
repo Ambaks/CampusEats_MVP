@@ -1,10 +1,11 @@
 from sqlalchemy.orm import Session
 from sqlalchemy import func
-from models import Meal
+from models import Meal, Cart
 from schemas import MealCreate, MealUpdate
 from math import radians, cos, sin, sqrt, atan2, dist
 from typing import List, Optional
 from fastapi import HTTPException
+from datetime import datetime, timedelta
 
 # Create a new meal
 def create_meal(db: Session, meal: MealCreate, seller_id: int) -> Meal:
@@ -108,3 +109,42 @@ def delete_meal(db: Session, meal_id: int) -> dict:
     except Exception as e:
         db.rollback()
         raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
+    
+
+def get_cart(db: Session, user_id: str):
+    return db.query(Cart).filter(Cart.user_id == user_id).first()
+
+def create_or_update_cart(db: Session, user_id: str, items: list):
+    updated_items = []
+    
+    for item in items:
+        meal = db.query(Meal).filter(Meal.id == item["meal_id"]).first()
+        if not meal:
+            continue  # Skip invalid items
+        
+        updated_items.append({
+            "meal_id": meal.id,
+            "name": meal.name,
+            "price": meal.price,  # Ensure price is included
+            "quantity": item.get("quantity", 1)
+        })
+
+    cart = db.query(Cart).filter(Cart.user_id == user_id).first()
+    
+    if cart:
+        cart.items = updated_items  # Update existing cart
+    else:
+        cart = Cart(user_id=user_id, items=updated_items)
+        db.add(cart)
+
+    db.commit()
+    db.refresh(cart)
+    return cart
+
+def cleanup_old_carts(db: Session, days_old: int = 30):
+    expiration_date = datetime.utcnow() - timedelta(days=days_old)
+    old_carts = db.query(Cart).filter(Cart.updated_at < expiration_date).all()
+    for cart in old_carts:
+        db.delete(cart)
+    db.commit()
+    return len(old_carts)
