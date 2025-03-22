@@ -1,10 +1,21 @@
 from sqlalchemy.orm import declarative_base, relationship
-from sqlalchemy import Column, Integer, String, Float, ForeignKey, Text, DateTime, Boolean, func, Index
-from sqlalchemy.dialects.postgresql import ARRAY, JSON
+from sqlalchemy import Column, Integer, String, Float, ForeignKey, Text, DateTime, Boolean, func, Index, Table
+from sqlalchemy.dialects.postgresql import ARRAY, JSON, UUID
 from datetime import datetime
 from database import Base
+from uuid import uuid4
 
 Base = declarative_base()
+
+
+order_meal_association = Table(
+    "order_meal_association",
+    Base.metadata,
+    Column("order_id", UUID, ForeignKey("orders.id"), primary_key=True),
+    Column("meal_id", Integer, ForeignKey("meals.id"), primary_key=True)
+)
+
+
 
 class User(Base):
     __tablename__ = "users"
@@ -37,29 +48,31 @@ class Meal(Base):
     price = Column(Float, nullable=False)
     image_url = Column(String, nullable=True)
     seller_id = Column(String, ForeignKey("users.id"), nullable=False)
-    latitude = Column(Float, nullable=True)  # New field
-    longitude = Column(Float, nullable=True)  # New field
+    latitude = Column(Float, nullable=True)
+    longitude = Column(Float, nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)
-    
-    seller = relationship("User", back_populates="meals")
-    orders = relationship("Order", back_populates="meal")
 
-    # Add index for faster location-based queries
+    seller = relationship("User", back_populates="meals")
+    
+    # Many-to-Many Relationship
+    orders = relationship("Order", secondary=order_meal_association, back_populates="meals")
+
     __table_args__ = (Index('idx_meal_location', 'latitude', 'longitude'),)
+
 
 class Order(Base):
     __tablename__ = "orders"
     
-    id = Column(Integer, primary_key=True, index=True)
+    id = Column(UUID(as_uuid=True), primary_key=True, default=lambda: uuid4())
     buyer_id = Column(String, ForeignKey("users.id"), nullable=False)
-    meal_id = Column(Integer, ForeignKey("meals.id"), nullable=False)
-    quantity = Column(Integer, nullable=False, default=1)
     total_price = Column(Float, nullable=False)
     status = Column(String, default="pending")  # pending, completed, canceled
     created_at = Column(DateTime, default=datetime.utcnow)
-    
+
     buyer = relationship("User", back_populates="orders")
-    meal = relationship("Meal", back_populates="orders")
+    
+    # Many-to-Many Relationship
+    meals = relationship("Meal", secondary=order_meal_association, back_populates="orders")
 
 
 class Cart(Base):

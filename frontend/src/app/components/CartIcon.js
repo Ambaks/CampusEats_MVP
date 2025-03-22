@@ -132,9 +132,9 @@ const CartIcon = () => {
               </Typography>
             </Box>
             <Typography variant="body2" color="text.secondary">
-              SHIPPING & TAXES CALCULATED AT CHECKOUT
+              TAXES CALCULATED AT CHECKOUT
             </Typography>
-            <Link href="/orders" passHref>
+            <Link href="/checkout" passHref>
               <Button variant="contained" color="primary" fullWidth sx={{ mt: 2 }}>
                 CHECKOUT
               </Button>

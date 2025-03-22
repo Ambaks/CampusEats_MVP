@@ -1,11 +1,13 @@
 from sqlalchemy.orm import Session
 from sqlalchemy import func
-from models import Meal, Cart
-from schemas import MealCreate, MealUpdate
+from models import Meal, Cart, User
+from schemas import MealCreate, MealUpdate, MealResponse
 from math import radians, cos, sin, sqrt, atan2, dist
 from typing import List, Optional
 from fastapi import HTTPException
 from datetime import datetime, timedelta
+from firebase_admin import auth
+
 
 # Create a new meal
 def create_meal(db: Session, meal: MealCreate, seller_id: int) -> Meal:
@@ -44,7 +46,7 @@ def get_meal(db: Session, meal_id: int) -> Optional[Meal]:
     return meal
 
 # Fetch nearby meals with distance calculation
-def get_meals(db: Session, user_lat: float, user_lon: float, radius: float = 10, skip: int = 0, limit: int = 10) -> List[Meal]:
+def get_meals(db: Session, user_lat: float, user_lon: float, radius: float = 10, skip: int = 0, limit: int = 10) -> List[MealResponse]:
     """
     Retrieve meals within a given radius (km) from the user's location, sorted by distance.
     Supports pagination with `skip` and `limit`.
@@ -148,3 +150,20 @@ def cleanup_old_carts(db: Session, days_old: int = 30):
         db.delete(cart)
     db.commit()
     return len(old_carts)
+
+
+def get_user_by_email(db: Session, email: str):
+    return db.query(User).filter(User.email == email).first()
+
+def create_user(db: Session, email: str):
+    # Create user in Firebase
+    firebase_user = auth.create_user(email=email)
+    username = email.split('@')[0]
+
+    # Create user in PostgreSQL
+    new_user = User(id=firebase_user.uid, email=email, username=username)
+    db.add(new_user)
+    db.commit()
+    db.refresh(new_user)
+
+    return new_user

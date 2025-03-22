@@ -79,3 +79,11 @@ def remove_cart_item(user_id: str, meal_id: int, db: Session = Depends(get_db)):
     db.commit()
     db.refresh(cart)
     return cart
+
+@router.post("/api/clear-cart")
+async def clear_cart(user=Depends(get_current_user), db: Session = Depends(get_db)):
+    try:
+        db.clear_user_cart(user.id)  # Replace with your actual database logic
+        return {"message": "Cart cleared successfully"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail="Failed to clear cart")

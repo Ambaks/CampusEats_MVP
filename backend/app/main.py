@@ -40,6 +40,7 @@ app.include_router(endpoints.router)
 app.include_router(payments.router)
 
 
+
 @app.get("/")
 def read_root():
     return {"message": "Welcome to CampusEats API!"}

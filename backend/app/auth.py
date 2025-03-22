@@ -4,6 +4,12 @@ from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from sqlalchemy.orm import Session
 from database import get_db
 from models import User
+import firebase_admin
+from firebase_admin import credentials
+
+# Initialize the Firebase Admin SDK with your service account credentials.
+cred = credentials.Certificate("/Users/naiahoard/Desktop/CampusEats_MVP/backend/campuseats-bf7cc-firebase-adminsdk-fbsvc-07e06423b7.json")
+firebase_admin.initialize_app(cred)
 
 security = HTTPBearer()
 

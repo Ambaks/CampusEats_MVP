@@ -8,21 +8,17 @@ export const CartProvider = ({ children }) => {
   const [cart, setCart] = useState([]);
   const { user } = useAuth();
 
-  // Load cart from localStorage if guest
-  useEffect(() => {
-    if (!user || !user.id) {
-      const localCart = localStorage.getItem("cart");
-      setCart(localCart ? JSON.parse(localCart) : []);
-    }
-  }, [user]);
-
   // Load cart from backend if logged in
   useEffect(() => {
+
     if (user && user.id) {
       fetch(`/api/cart/${user.id}`)
         .then((res) => res.json())
         .then((data) => setCart(data.items || []))
         .catch((error) => console.error("Error fetching cart:", error));
+    } else {
+      const localCart = localStorage.getItem("cart");
+      setCart(localCart ? JSON.parse(localCart) : []);
     }
   }, [user]);
 
@@ -63,7 +59,7 @@ export const CartProvider = ({ children }) => {
 
   // Remove item from cart
   const removeFromCart = async (mealId) => {
-    const updatedCart = cart.filter((item) => item.mealId !== mealId);
+    const updatedCart = cart.filter((item) => item.id !== mealId);
 
     if (user && user.id) {
       try {
@@ -78,8 +74,8 @@ export const CartProvider = ({ children }) => {
       }
     } else {
       localStorage.setItem("cart", JSON.stringify(updatedCart));
+      console.log("Cart successfully updated in localStorage: ", updatedCart)
     }
-    console.log("NEW CART: ", updatedCart)
     setCart(updatedCart);
   };
 
@@ -89,9 +85,10 @@ export const CartProvider = ({ children }) => {
       removeFromCart(mealId);
       return;
     }
+    console.log("MEAL ID: ", mealId);
 
     const updatedCart = cart.map((item) =>
-      item.mealId === mealId ? { ...item, quantity: newQuantity } : item
+      item.id === mealId ? { ...item, quantity: newQuantity } : item
     );
 
     if (user && user.id) {

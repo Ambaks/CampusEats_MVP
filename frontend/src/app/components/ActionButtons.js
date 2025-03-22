@@ -11,6 +11,7 @@ import {
   Radio,
   Grid,
   Card,
+  Divider,
 } from "@mui/material";
 import { useCart } from "../context/CartContext";
 
@@ -21,7 +22,6 @@ const ActionButtons = ({ meal }) => {
   const [orderOpen, setOrderOpen] = useState(false);
   const [selectedTime, setSelectedTime] = useState("");
   const [quantity, setQuantity] = useState(1);
-  const [deliveryOption, setDeliveryOption] = useState("delivery");
   const { addToCart } = useCart();
 
   const handleInfoOpen = () => setInfoOpen(true);
@@ -40,14 +40,19 @@ const ActionButtons = ({ meal }) => {
     e.preventDefault();
     const action = e.nativeEvent.submitter.value;
 
-    // Gather form data into an object.
+    // Check if a time slot is selected
+    if (!selectedTime) {
+      alert("Please select a pickup time before placing your order.");
+      return; // Stop execution if no time is selected
+    }
+
+    // Gather form data into an object
     const orderData = {
       mealId: meal.id,
       name: meal.name,
       image_url: meal.image_url,
       price: meal.price,
       quantity: quantity,
-      deliveryOption: deliveryOption,
       pickupTime: selectedTime,
     };
 
@@ -57,12 +62,12 @@ const ActionButtons = ({ meal }) => {
       handleOrderClose();
     } else if (action === "buy") {
       // For a Buy Now action, you might submit the order data to a different endpoint.
-      // Here we simulate the submission and then redirect to the /orders page.
       await addToCart(orderData);
       handleOrderClose();
-      window.location.href = "/orders";
+      window.location.href = "/checkout";
     }
-  };
+};
+
 
   return (
     <>
@@ -155,19 +160,6 @@ const ActionButtons = ({ meal }) => {
               onChange={(e) => setQuantity(Number(e.target.value))}
             />
 
-            {/* Delivery or Pickup Selection */}
-            <FormControl component="fieldset" sx={{ mt: 2 }}>
-              <Typography variant="subtitle1">Delivery or Pickup?</Typography>
-              <RadioGroup
-                row
-                value={deliveryOption}
-                onChange={(e) => setDeliveryOption(e.target.value)}
-              >
-                <FormControlLabel value="delivery" control={<Radio />} label="Delivery" />
-                <FormControlLabel value="pickup" control={<Radio />} label="Pickup" />
-              </RadioGroup>
-            </FormControl>
-
             {/* Pickup Time Slots */}
             <Typography variant="subtitle1" sx={{ mt: 2 }}>
               Select a Pickup Time
@@ -191,6 +183,13 @@ const ActionButtons = ({ meal }) => {
                 </Grid>
               ))}
             </Grid>
+
+              <Divider sx={{mt: 2}}/>
+
+            {/* Total Price Calculation */}
+            <Typography variant="h6" sx={{ mt: 2, fontWeight: "semi-bold" }}>
+              Total: ${meal.price * quantity}
+            </Typography>
 
             {/* Action Buttons */}
             <Box sx={{ display: "flex", justifyContent: "space-between", mt: 3 }}>

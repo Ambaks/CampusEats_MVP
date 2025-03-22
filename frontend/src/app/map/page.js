@@ -1,27 +1,43 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Fab, Drawer, Card, CardContent, Typography } from "@mui/material";
 import { Restaurant } from "@mui/icons-material";
+import { fetchMeals } from "../services/api";
+import useGeolocation from "../services/useGeolocation";
+
 
 const MapComponent = dynamic(() => import("../components/MapComponent"), { ssr: false });
 
 export default function MapView() {
     const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+    const [meals, setMeals] = useState([]);
+    const {location} = useGeolocation();
+
+    // Fetch user location once when component mounts
     
-    const meals = [
-        { id: 1, name: "Spaghetti Bolognese", location: [37.7749, -122.4194] },
-        { id: 2, name: "Chicken Tikka", location: [37.7849, -122.4094] },
-        { id: 3, name: "Sushi Rolls", location: [37.7649, -122.4294] },
-    ];
+    // Fetch meals only after location is set
+    useEffect(() => {
+        const loadMeals = async () => {
+            if (!location || location.lat === null || location.lon === null) return;
+            try {
+                console.log("Fetching meals with LATLNG:", location.lat, location.lon);
+                const data = await fetchMeals(location.lat, location.lon);
+                console.log("Meals fetched:", data);
+                setMeals(data);
+            } catch (err) {
+                console.error("Error fetching meals:", err);
+            }
+        };
+
+        loadMeals();
+    }, [location]); // Runs only when `location` updates
 
     return (
         <div className="relative h-screen w-screen">
-            {/* Dynamically Loaded Map */}
             <MapComponent meals={meals} />
 
-            {/* Floating Action Button */}
             <Fab
                 color="primary"
                 className="fixed top-[33%] right-4"
@@ -30,12 +46,11 @@ export default function MapView() {
                 <Restaurant />
             </Fab>
 
-            {/* Drawer for Meal List */}
             <Drawer
                 anchor="bottom"
                 open={isDrawerOpen}
                 onClose={() => setIsDrawerOpen(false)}
-                PaperProps={{ className: "rounded-t-2xl p-4 max-h-[70vh] overflow-auto" }}
+                PaperProps={{ sx: { borderRadius: "16px 16px 0 0", padding: 2, maxHeight: "70vh", overflow: "auto" } }}
             >
                 <Typography variant="h6" align="center" gutterBottom>
                     Available Meals

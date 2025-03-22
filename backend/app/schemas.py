@@ -1,7 +1,7 @@
 from pydantic import BaseModel, EmailStr
-from typing import Optional
+from typing import Optional, List
 from datetime import datetime
-
+from uuid import UUID
 
 class UserCreate(BaseModel):
     email: EmailStr
@@ -57,3 +57,8 @@ class MealResponse(BaseModel):
 
     class Config:
         orm_mode = True
+
+class OrderCreate(BaseModel):
+    email: str 
+    meals: List 
+    total_price: float

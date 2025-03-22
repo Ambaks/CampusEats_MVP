@@ -78,7 +78,7 @@ const RecommendedMeals = ({ userLat, userLon, count = 2 }) => {
 
               {/* ADD TO CART Button */}
               <Button variant="contained" fullWidth sx={{ mt: 1 }}>
-                ADD TO CART
+                View Details
               </Button>
             </Box>
           </Box>

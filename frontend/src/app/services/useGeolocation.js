@@ -12,7 +12,10 @@ const useGeolocation = () => {
             lon: position.coords.longitude,
           });
         },
-        (error) => console.error("Geolocation error:", error)
+        (error) => {
+          console.error("Geolocation error:", error);
+          setLocation({ lat: 0, lon: 0 }); // Default to 0,0 to avoid undefined errors
+        }
       );
     }
   }, []);
