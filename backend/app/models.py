@@ -31,6 +31,7 @@ class User(Base):
 
     meals = relationship("Meal", back_populates="seller")
     orders = relationship("Order", back_populates="buyer")
+    orders_received = relationship("ChefOrder", back_populates="chef")
 
 
     created_at = Column(DateTime, default=func.now())  # Auto timestamp
@@ -74,6 +75,17 @@ class Order(Base):
     # Many-to-Many Relationship
     meals = relationship("Meal", secondary=order_meal_association, back_populates="orders")
 
+class ChefOrder(Base):
+    __tablename__ = "chef_orders"
+
+    id = Column(Integer, primary_key=True, index=True)
+    order_id = Column(String, ForeignKey("orders.id"), nullable=False)
+    buyer_id = Column(String, ForeignKey("users.id"), nullable=False)
+    meal_id = Column(Integer, ForeignKey("meals.id"), nullable=False)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+    chef = relationship("User", back_populates="orders_received")
+    meal = relationship("Meal")
 
 class Cart(Base):
     __tablename__ = "carts"

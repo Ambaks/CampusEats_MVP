@@ -6,10 +6,10 @@ import os
 from dotenv import load_dotenv
 import stripe
 from schemas import OrderCreate
-from models import Order, Meal
+from models import Order, Meal, ChefOrder
 from uuid import uuid4
 from database import get_db
-from crud import get_user_by_email, create_user
+from crud import get_user_by_email, create_user, create_order
 
 # Load environment variables from .env file
 load_dotenv()
@@ -93,9 +93,6 @@ async def stripe_webhook(request: Request, db: Session = Depends(get_db)):
 
         # Retrieve metadata
         metadata = session_data.get("metadata", {})
-        order_id = metadata.get("order_id")
-        buyer_id = metadata.get("buyer_id")
-        total_price = float(metadata.get("total_price"))
         meals_json = metadata.get("meals", "[]")
         meals_data = json.loads(meals_json)
 
@@ -105,14 +102,18 @@ async def stripe_webhook(request: Request, db: Session = Depends(get_db)):
         # Query the Meal model to get the Meal instances
         meal_instances = db.query(Meal).filter(Meal.id.in_(meal_ids)).all()
 
-        # Create the order now that payment is complete
-        new_order = Order(
-            id=order_id,
-            buyer_id=buyer_id,
-            meals=meal_instances,
-            total_price=total_price,
-        )
-        db.add(new_order)
-        db.commit()
+        new_order = create_order(metadata)
+
+        # Loop through meals and create a ChefOrder for each one
+        for meal in meal_instances:
+            chef_order = ChefOrder(
+                chef_id=meal.seller_id,  # Fetch chef from the meal
+                order_id=new_order.id,
+                meal_id=meal.id,
+                status="pending",
+            )
+            db.add(chef_order)
+
+        db.commit()  # Commit all chef orders
 
     return {"status": "success"}

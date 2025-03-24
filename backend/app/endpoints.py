@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from database import get_db
 from models import Meal, User
 from schemas import MealCreate, MealUpdate, UserCreate, UserResponse, MealResponse
-from crud import create_meal, get_meal, get_meals, update_meal, delete_meal, get_cart, create_or_update_cart
+from crud import create_meal, get_meal, get_meals, update_meal, delete_meal, get_cart, create_or_update_cart, get_chef_orders_by_chef
 from typing import List
 from auth import get_current_user  # Import authentication dependency
 
@@ -87,3 +87,7 @@ async def clear_cart(user=Depends(get_current_user), db: Session = Depends(get_d
         return {"message": "Cart cleared successfully"}
     except Exception as e:
         raise HTTPException(status_code=500, detail="Failed to clear cart")
+    
+@router.get("api/orders/{user_id}")
+def read_chef_orders(user_id: str, db: Session = Depends(get_db)):
+    return get_chef_orders_by_chef(db, user_id)

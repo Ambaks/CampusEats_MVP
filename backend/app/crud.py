@@ -1,7 +1,8 @@
+import json
 from sqlalchemy.orm import Session
 from sqlalchemy import func
-from models import Meal, Cart, User
-from schemas import MealCreate, MealUpdate, MealResponse
+from models import Meal, Cart, User, ChefOrder, Order
+from schemas import MealCreate, MealUpdate, MealResponse, ChefOrderCreate, ChefOrderResponse
 from math import radians, cos, sin, sqrt, atan2, dist
 from typing import List, Optional
 from fastapi import HTTPException
@@ -167,3 +168,83 @@ def create_user(db: Session, email: str):
     db.refresh(new_user)
 
     return new_user
+
+def create_chef_order(db: Session, chef_id: int, order_id: int, meal_id: int, status: str = "pending") -> ChefOrder:
+    chef_order = ChefOrder(
+        chef_id=chef_id,
+        order_id=order_id,
+        meal_id=meal_id,
+        status=status
+    )
+    try:
+        db.add(chef_order)
+        db.commit()
+        db.refresh(chef_order)
+        return chef_order
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
+
+# Get all ChefOrders for a specific chef
+def get_chef_orders_by_chef(db: Session, chef_id: str) -> List[ChefOrderResponse]:
+    return db.query(ChefOrder).filter(ChefOrder.chef_id == chef_id).all()
+
+# Get all ChefOrders for a specific order
+def get_chef_orders_by_order(db: Session, order_id: int) -> List[ChefOrderResponse]:
+    return db.query(ChefOrder).filter(ChefOrder.order_id == order_id).all()
+
+# Delete a ChefOrder (raises 404 if not found)
+def delete_chef_order(db: Session, chef_order_id: int) -> dict:
+    chef_order = db.get(ChefOrder, chef_order_id)
+    if chef_order is None:
+        raise HTTPException(status_code=404, detail="ChefOrder not found")
+
+    try:
+        db.delete(chef_order)
+        db.commit()
+        return {"message": "ChefOrder deleted successfully"}
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
+    
+# Creates chekout receipt (full order)
+def create_order(db: Session, metadata):
+    """
+    Creates an order and associated ChefOrder entries.
+    
+    :param db: Database session.
+    :param order_data: OrderCreate schema containing order details.
+    :return: The newly created order.
+    """
+    try:
+        # Extract metadata
+        order_id = metadata.get("order_id")
+        buyer_id = metadata.get("buyer_id")
+        total_price = float(metadata.get("total_price"))
+        meals_json = metadata.get("meals", "[]")
+        meals_data = json.loads(meals_json)
+
+        # Extract meal IDs from the provided data
+        meal_ids = [meal["id"] for meal in meals_data if "id" in meal]
+
+        # Fetch the Meal instances from the database
+        meal_instances = db.query(Meal).filter(Meal.id.in_(meal_ids)).all()
+
+        # Ensure all meals exist in the database
+        if len(meal_instances) != len(meal_ids):
+            raise HTTPException(status_code=400, detail="Some meals not found.")
+
+        # Create the order
+        new_order = Order(
+            id=order_id,
+            buyer_id=buyer_id,
+            total_price=total_price
+        )
+        db.add(new_order)
+        db.commit()
+
+        return new_order
+
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")

@@ -62,3 +62,21 @@ class OrderCreate(BaseModel):
     email: str 
     meals: List 
     total_price: float
+
+class ChefOrderCreate(BaseModel):
+    chef_id: int
+    order_id: int
+    meal_id: int
+    status: Optional[str] = "pending"
+
+# Schema for returning a ChefOrder response
+class ChefOrderResponse(BaseModel):
+    id: int
+    chef_id: int
+    order_id: int
+    meal_id: int
+    status: str
+    created_at: datetime
+
+    class Config:
+        from_attributes = True

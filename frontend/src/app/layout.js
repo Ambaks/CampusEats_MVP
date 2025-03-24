@@ -5,6 +5,8 @@ import Navbar from "./components/Navbar";
 import { AuthProvider } from "./context/AuthContext"; // adjust the path if needed
 import { CartProvider } from "./context/CartContext"; // adjust the path if needed
 import { OrderProvider } from "./context/OrderContext"; // import OrderProvider
+import "cesium/Build/Cesium/Widgets/widgets.css";
+
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
